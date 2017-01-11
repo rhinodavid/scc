@@ -52,6 +52,12 @@ func (g *graph) addNode(label int) bool {
 	return false
 }
 
+func (g *graph) resetVisited() {
+	for _, n := range g.nodes {
+		n.visited = false
+	}
+}
+
 func (g *graph) showGraph() {
 	for k, v := range g.nodes {
 		fmt.Printf("Node %d:\nEdges: %v\nBackwards Edges: %v\n\n", k, v.edges, v.rEdges)
