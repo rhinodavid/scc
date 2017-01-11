@@ -1,6 +1,13 @@
 package main
 
-import "fmt"
+import (
+	"bufio"
+	"flag"
+	"fmt"
+	"os"
+	"strconv"
+	"strings"
+)
 
 type node struct {
 	finishingNumber, startingNumber int
@@ -33,20 +40,53 @@ func (g *graph) addEdge(t, h int) {
 		panic("No node for edge head")
 	}
 	g.nodes[t].edges = append(g.nodes[t].edges, h)
-	g.nodes[h].rEdges = append(g.nodes[t].rEdges, t)
+	g.nodes[h].rEdges = append(g.nodes[h].rEdges, t)
 }
 
-func (g *graph) addNode(label int) {
+func (g *graph) addNode(label int) bool {
 	if _, ok := g.nodes[label]; !ok {
 		n := newNode()
 		g.nodes[label] = n
+		return true
+	}
+	return false
+}
+
+func (g *graph) showGraph() {
+	for k, v := range g.nodes {
+		fmt.Printf("Node %d:\nEdges: %v\nBackwards Edges: %v\n\n", k, v.edges, v.rEdges)
 	}
 }
 
 func main() {
 	g := newGraph()
-	g.addNode(1)
-	g.addNode(2)
-	g.addEdge(1, 2)
-	fmt.Println(g.nodes[3])
+
+	flag.Parse()
+	if len(flag.Args()) < 1 {
+		panic("Enter the name of the file with the graph edges list")
+	}
+	f, err := os.Open(flag.Args()[0])
+	if err != nil {
+		panic(err)
+	}
+	scanner := bufio.NewScanner(f)
+	for scanner.Scan() {
+		line := scanner.Text()
+		iS := strings.Fields(line)
+		if len(iS) != 2 {
+			panic(fmt.Sprintf("Bad line in graph file: %v", iS))
+		}
+		t, err1 := strconv.Atoi(iS[0])
+		if err1 != nil {
+			panic(err1)
+		}
+		h, err2 := strconv.Atoi(iS[1])
+		if err2 != nil {
+			panic(err2)
+		}
+		g.addNode(t)
+		g.addNode(h)
+		g.addEdge(t, h)
+	}
+	g.showGraph()
 }
