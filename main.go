@@ -112,6 +112,9 @@ func (g *graph) generateScc() {
 func (g *graph) getTopFiveSccs() []int {
 	a := make(map[int]int)
 	for _, n := range g.nodes {
+		if n.sccID == -1 {
+			panic(fmt.Sprintf("Error generating top five SCCs. Expected sccID to be set (> -1) but saw %d.", n.sccID))
+		}
 		a[n.sccID]++
 	}
 	r := make([]int, 5)
