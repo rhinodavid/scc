@@ -11,9 +11,9 @@ import (
 )
 
 type node struct {
-	finishingNumber, sccID int
-	visited                bool
-	edges, rEdges          []int
+	sccID         int
+	visited       bool
+	edges, rEdges []int
 }
 
 type graph struct {
@@ -29,7 +29,6 @@ func newGraph() *graph {
 func newNode() *node {
 	var n node
 	n.sccID = -1
-	n.finishingNumber = -1
 	return &n
 }
 
@@ -120,7 +119,6 @@ func (g *graph) getTopFiveSccs() []int {
 		if sccPopulation > r[0] {
 			r[0] = sccPopulation
 		}
-		// sort descending
 		sort.Ints(r)
 	}
 	return r
