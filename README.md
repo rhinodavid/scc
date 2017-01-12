@@ -10,6 +10,10 @@ See `test_graph.txt` for a sample input. Each line on the input file represents 
 Nodes are labeled by integers, and each edge consists of the label of the tail node followed by the label
 of the head node.
 
+The sample graph in `test_graph.txt` is depicted below, with the strongly connected components circled in red.
+
+<img src="graph.png" width=350>
+
 ## Usage
 
 Run `go run main.go <GRAPH_FILE.txt>`. The output will be the population of the top five most populous
