@@ -5,12 +5,13 @@ import (
 	"flag"
 	"fmt"
 	"os"
+	"sort"
 	"strconv"
 	"strings"
 )
 
 type node struct {
-	finishingNumber, sccId int
+	finishingNumber, sccID int
 	visited                bool
 	edges, rEdges          []int
 }
@@ -27,7 +28,7 @@ func newGraph() *graph {
 
 func newNode() *node {
 	var n node
-	n.sccId = -1
+	n.sccID = -1
 	n.finishingNumber = -1
 	return &n
 }
@@ -60,7 +61,7 @@ func (g *graph) resetVisited() {
 
 func (g *graph) showGraph() {
 	for k, v := range g.nodes {
-		fmt.Printf("Node %d (SCC ID#: %d):\nEdges: %v\nBackwards Edges: %v\n\n", k, v.sccId, v.edges, v.rEdges)
+		fmt.Printf("Node %d (SCC ID#: %d):\nEdges: %v\nBackwards Edges: %v\n\n", k, v.sccID, v.edges, v.rEdges)
 	}
 }
 
@@ -87,7 +88,7 @@ func dfsAssignFinishingNumber(n *node, g *graph, t *[]*node) {
 
 func dfsMarkScc(n *node, g *graph, s int) {
 	n.visited = true
-	n.sccId = s
+	n.sccID = s
 	for _, neighborLabel := range n.edges {
 		if g.nodes[neighborLabel].visited == false {
 			dfsMarkScc(g.nodes[neighborLabel], g, s)
@@ -107,6 +108,22 @@ func (g *graph) generateScc() {
 			dfsMarkScc(n, g, s)
 		}
 	}
+}
+
+func (g *graph) getTopFiveSccs() []int {
+	a := make(map[int]int)
+	for _, n := range g.nodes {
+		a[n.sccID]++
+	}
+	r := make([]int, 5)
+	for _, sccPopulation := range a {
+		if sccPopulation > r[0] {
+			r[0] = sccPopulation
+		}
+		// sort descending
+		sort.Ints(r)
+	}
+	return r
 }
 
 func main() {
@@ -140,5 +157,5 @@ func main() {
 		g.addEdge(t, h)
 	}
 	g.generateScc()
-	g.showGraph()
+	fmt.Println(g.getTopFiveSccs())
 }
