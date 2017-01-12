@@ -10,9 +10,9 @@ import (
 )
 
 type node struct {
-	finishingNumber, startingNumber int
-	visited                         bool
-	edges, rEdges                   []int
+	finishingNumber, sccId int
+	visited                bool
+	edges, rEdges          []int
 }
 
 type graph struct {
@@ -27,7 +27,7 @@ func newGraph() *graph {
 
 func newNode() *node {
 	var n node
-	n.startingNumber = -1
+	n.sccId = -1
 	n.finishingNumber = -1
 	return &n
 }
@@ -60,7 +60,52 @@ func (g *graph) resetVisited() {
 
 func (g *graph) showGraph() {
 	for k, v := range g.nodes {
-		fmt.Printf("Node %d:\nEdges: %v\nBackwards Edges: %v\n\n", k, v.edges, v.rEdges)
+		fmt.Printf("Node %d (SCC ID#: %d):\nEdges: %v\nBackwards Edges: %v\n\n", k, v.sccId, v.edges, v.rEdges)
+	}
+}
+
+func (g *graph) createFinishingOrder() []*node {
+	g.resetVisited()
+	t := make([]*node, 0, len(g.nodes))
+	for _, v := range g.nodes {
+		if v.visited == false {
+			dfsAssignFinishingNumber(v, g, &t)
+		}
+	}
+	return t
+}
+
+func dfsAssignFinishingNumber(n *node, g *graph, t *[]*node) {
+	n.visited = true
+	for _, neighborLabel := range n.rEdges {
+		if g.nodes[neighborLabel].visited == false {
+			dfsAssignFinishingNumber(g.nodes[neighborLabel], g, t)
+		}
+	}
+	(*t) = append(*t, n)
+}
+
+func dfsMarkScc(n *node, g *graph, s int) {
+	n.visited = true
+	n.sccId = s
+	for _, neighborLabel := range n.edges {
+		if g.nodes[neighborLabel].visited == false {
+			dfsMarkScc(g.nodes[neighborLabel], g, s)
+		}
+	}
+}
+
+func (g *graph) generateScc() {
+	p := 0
+	fo := g.createFinishingOrder()
+	g.resetVisited()
+	for i := len(fo) - 1; i >= 0; i-- {
+		n := fo[i]
+		if n.visited == false {
+			s := p
+			p++
+			dfsMarkScc(n, g, s)
+		}
 	}
 }
 
@@ -94,5 +139,6 @@ func main() {
 		g.addNode(h)
 		g.addEdge(t, h)
 	}
+	g.generateScc()
 	g.showGraph()
 }
